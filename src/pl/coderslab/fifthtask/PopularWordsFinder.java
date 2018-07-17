@@ -11,9 +11,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Scanner;
-import java.util.StringTokenizer;
+import java.util.*;
 
 public class PopularWordsFinder {
     public static void main(String[] args) {
@@ -34,16 +32,13 @@ public class PopularWordsFinder {
             try {
                 FileWriter fw = new FileWriter("popular_words.txt", true);
                 for (Element elem : links) {
-                   // StringTokenizer strToken = new StringTokenizer(elem.text().trim().replaceAll("[\\?\\.\\,\\:\\;\\(\\)\\!\"]",""));
                     StringTokenizer strToken = new StringTokenizer(elem.text().trim().replaceAll("[^\\p{L} ]","")); // ^ not Unicode or space
                     String element;
                     while (strToken.hasMoreTokens()) {
                         element = strToken.nextToken();
                         if (element.length() > 2)
                             fw.append(element + "\n");
-                       // System.out.println(elem.text());
                     }
-
                 }
                 fw.close();
             } catch (IOException ex) {
@@ -54,26 +49,79 @@ public class PopularWordsFinder {
                 (IOException e) {
             e.printStackTrace();
         }
-        String [] wordsFilter = {"oraz", "lub", "ponieważ", "także", "nie", "jest", "otrzyma", "się", "jak", "ale"};
 
-        filterHeadlines("popular_words.txt", wordsFilter);
+        filterHeadlines("popular_words.txt", "words_to_filter.txt");
+        sortedPopularWords("filtered_popular_words.txt");
     }
 
     /**
-     * This method reads from a file, and checks the contents of a file against a user defined array of words,
-     * and writes words filtered in that way to a new text file.
-     * @param filename The name of the file from which to read.
-     * @param array A user created array containing words to filter.
+     *  This method sorts the filtered popular words file and creates a new text file with
+     *  numerical values describing each word count.
+     * @param filename Name of the file with words to sort.
      */
-    private static void filterHeadlines (String filename, String [] array) {
+    private static void sortedPopularWords (String filename) {
         Path path = Paths.get(filename);
+        ArrayList<String> uncounted = new ArrayList<>();
+        ArrayList<String> counted = new ArrayList<>();
+        int wordCounter = 0;
+        try {
+            Scanner scn = new Scanner(path);
+            while (scn.hasNextLine()){
+                uncounted.add(scn.nextLine());
+            }
+        } catch (IOException e) {
+            System.out.println("Cannot read from file.");
+        }
+        Collections.sort(uncounted);
+        for (int i  = 0; i < uncounted.size() -1; i++) {
+            if (uncounted.get(i).equalsIgnoreCase(uncounted.get(i+1))){
+                wordCounter++;
+            } else {
+                counted.add(String.valueOf(wordCounter) + " " + uncounted.get(i));
+                wordCounter = 1;
+            }
+        }
+
+        Collections.sort(counted);
+        Collections.reverse(counted);
+
+
+        Path mostPopularWords = Paths.get("most_popular_words.txt");
+        try {
+            Files.write(mostPopularWords,counted);
+        } catch (IOException e) {
+            System.out.println("Error writing to file");
+        }
+
+    }
+
+    /**
+     * This method creates a collection of words from a user defined file, and uses it to filter
+     * a list of words from a different file. The outcome is then written to 'filtered_popular_words.txt' file
+     * @param filename File with words to filter.
+     * @param filterFilename Name of the file containing filter words.
+     */
+    private static void filterHeadlines (String filename, String filterFilename) {
+        Path path = Paths.get(filename);
+        Path filterPath = Paths.get(filterFilename);
+        ArrayList<String> filter = new ArrayList<>();
+
+        Scanner scan;
+        try {
+            scan = new Scanner(filterPath);
+            while (scan.hasNextLine()) {
+                filter.add(scan.nextLine().trim());
+            }
+        } catch (IOException e) {
+            System.out.println("Cannot read from file.");
+        }
 
         try {
-            Scanner scan = new Scanner(path);
+            scan = new Scanner(path);
             FileWriter filew = new FileWriter("filtered_popular_words.txt", true);
             while (scan.hasNextLine()) {
                 String str = scan.nextLine();
-                if(!Arrays.toString(array).contains(str))
+                if(!filter.contains(str))
                     filew.append(str + "\n");
 
             }

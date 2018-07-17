@@ -17,52 +17,64 @@ public class GuessNumbers2 {
     public static void letMeGuess () {
         Scanner scn = new Scanner(System.in);
         System.out.println("Pomyśl liczbę od 1 do 1000, a ja ją zgadnę w max. 10 krokach.");
-        int counter = 0;
+        int counter = 1;
         int min = 0;
         int max = 1000;
         String answer;
         boolean win = false;
-        loop1: //flaga
         while (true) {
             int guess = (((max - min) / 2) + min);
             System.out.println("Zgaduję : " + guess);
             System.out.println("Zgadłem?");
-            counter ++;
 
-            while (scn.hasNextLine()) {
-                answer = scn.nextLine();
-                if (answer.equals("tak")) {
-                    System.out.println("Wygrałem!");
-                    System.out.println("W " + counter + " krokach");
-                    break loop1; //przerywa i wraca do flagi.
-                }
 
-                System.out.println("Za dużo?");
-                answer = scn.nextLine();
-                if (answer.equals("tak")) {
-                    max = guess;
-                    break;
-                }
+            // while (scn.hasNextLine()) {
+            answer = userAnswer();
+            if (answer.equals("tak")) {
+                System.out.println("Wygrałem!");
+                System.out.println("W " + counter + " krokach");
+                break; //przerywa i wraca do flagi.
+            }
+
+            System.out.println("Za dużo?");
+            answer = userAnswer();
+            if (answer.equals("tak")) {
+                counter++;
+                max = guess;
+            } else {
 
                 System.out.println("Za mało?");
-                answer = scn.nextLine();
+                answer = userAnswer();
                 if (answer.equals("tak")) {
+                    counter++;
                     min = guess;
-                    break;
                 } else {
                     System.out.println("Nie oszukuj!");
                     counter--;
-                    break;
                 }
 
+                //}
             }
         }
-
-
-
-
-
     }
+
+    /**
+     * This method prompts user to enter an answer, and if the answer is different than
+     * either 'yes' or 'no', the method is invoked again.
+     * @return The answer.
+     */
+    public static String userAnswer() {
+        Scanner scn = new Scanner(System.in);
+        String answer = "";
+        answer = scn.nextLine().trim().toLowerCase();
+        if(answer.equals("tak") || answer.equals("nie")){
+        } else {
+            System.out.println("Odpowiedz 'tak', albo 'nie'.");
+            answer = userAnswer();
+        }
+        return answer;
+    }
+
 
 
 
