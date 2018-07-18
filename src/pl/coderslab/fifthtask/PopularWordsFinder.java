@@ -50,7 +50,7 @@ public class PopularWordsFinder {
             e.printStackTrace();
         }
 
-        filterHeadlines("popular_words.txt", "words_to_filter.txt");
+        filterHeadlines("popular_words.txt", "words_filter.txt");
         sortedPopularWords("filtered_popular_words.txt");
     }
 
@@ -82,9 +82,16 @@ public class PopularWordsFinder {
             }
         }
 
-        Collections.sort(counted);
-        Collections.reverse(counted);
+        Collections.sort(counted, new Comparator<String>() {
+            public int compare(String s1, String s2) {
+                int pop1 = Integer.parseInt(s1.split(" ")[0]);
+                int pop2 = Integer.parseInt(s2.split(" ")[0]);
 
+                /*For ascending order*/
+                //return pop1-pop2;
+                return pop2 - pop1;
+            }
+        });
 
         Path mostPopularWords = Paths.get("most_popular_words.txt");
         try {
